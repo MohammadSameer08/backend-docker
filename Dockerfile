@@ -1,21 +1,13 @@
-# Use an official Node.js runtime as a parent image
-FROM node:22-alpine
-
-# Set the working directory in the container
+# --- stage 1: build stage ---
+FROM node:22-alpine AS builder
 WORKDIR /app
-
-# Copy package.json and package-lock.json to the working directory
-COPY package.json ./
-
-# Install dependencies
+COPY package*.json ./
 RUN npm install
-
-# Copy the rest of the application code to the working directory
 COPY . .
 
-# Expose the port the app runs on
+# --- stage 2: production stage ---
+FROM node:22-alpine AS production
+WORKDIR /app
+COPY --from=builder /app .
 EXPOSE 3000
-
-# Start the application
 CMD ["node", "index.js"]
-
